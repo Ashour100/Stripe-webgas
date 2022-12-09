@@ -2,7 +2,10 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\FormController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -31,5 +34,4 @@ Route::middleware('auth')->group(function () {
     Route::resource('/form',FormController::class);
     // Route::get('/customer/:stripe_id',[CustomerController::class,'show']);
 });
-
 require __DIR__.'/auth.php';

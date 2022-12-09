@@ -24,9 +24,12 @@ class CustomerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(customer $customer)
     {
-        //
+        return view('Form.create', [
+            'user'=>$customer,
+            'intent' => $customer->createSetupIntent()
+        ]);
     }
 
     /**
@@ -35,9 +38,25 @@ class CustomerController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store($options,customer $customer)
+    public function store(Request $request,customer $customer)
     {
-        $stripeCustomer = $customer->createAsStripeCustomer($options);
+        $data = $request->all();
+        $options=[
+            'name'=> $data['card-holder-name']
+        ];
+        // $stripeCustomer = $customer->createAsStripeCustomer($options);
+        $paymentMethod = $data['payment_method'];
+        $customer->createOrGetStripeCustomer($options);
+        $customer->addPaymentMethod($paymentMethod);
+        try
+        {
+        $customer->charge(5*100, $paymentMethod);
+        }
+        catch (\Exception $e)
+        {
+        return back()->withErrors(['message' => 'Error creating subscription. ' . $e->getMessage()]);
+        }
+        return redirect('/customer');
     }
 
     /**
@@ -46,10 +65,11 @@ class CustomerController extends Controller
      * @param  \App\Models\customer  $customer
      * @return \Illuminate\Http\Response
      */
-    public function show($stripe_id)
+    public function show($stripeId)
     {
         // $this->StoreView($customer);
-        $customer = Cashier::stripe()->customers->all();
+        // $customer = Cashier::stripe()->customers->where('id','');
+        $customer = Cashier::findBillable($stripeId);
         return view('customer.show', compact("customer"));
     }
 
