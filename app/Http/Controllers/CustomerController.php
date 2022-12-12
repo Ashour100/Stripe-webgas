@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Laravel\Cashier\Cashier;
 use App\Models\customer;
 use Illuminate\Http\Request;
+use Laravel\Cashier\Payment;
 
 class CustomerController extends Controller
 {
@@ -59,6 +60,52 @@ class CustomerController extends Controller
         return redirect('/customer');
     }
 
+
+
+
+    public function createSepa(customer $customer)
+    {
+        $payment =$customer->payWith(50*100, ['sepa_debit']);
+        return view('Form.createSepa', [
+            'user'=>$customer,
+            'SetupIntent' => $customer->createSetupIntent(),
+            'PaymentIntent'=>$payment->client_secret
+        ]);
+    }
+
+        // public function paymentIntent(Request $request)
+    // {
+    //     $payment = $request->customer()->payWith(
+    //         100, ['sepa_debit']
+    //     );
+    
+    //     return $payment->client_secret;
+    // }
+
+
+    public function storeSepa(Request $request,customer $customer)
+    {
+        $data = $request->all();
+        $options=[
+            'name'=> $data['name'],
+            'email'=>$data['email']
+        ];
+        // dd($options);
+        // $stripeCustomer = $customer->createAsStripeCustomer($options);
+        $paymentMethod = $data['payment_method'];
+        $customer->createOrGetStripeCustomer($options);
+        $customer->addPaymentMethod($paymentMethod);
+        // $customer->updateDefaultPaymentMethod($paymentMethod);
+        try
+        {
+        $customer->charge(5*100, $paymentMethod);
+        }
+        catch (\Exception $e)
+        {
+        return back()->withErrors(['message' => 'Error creating subscription. ' . $e->getMessage()]);
+        }
+        return redirect('/customer');
+    }
     /**
      * Display the specified resource.
      *
@@ -81,7 +128,10 @@ class CustomerController extends Controller
      */
     public function edit(customer $customer)
     {
-        //
+        return view('Form.edit', [
+            'user'=>$customer,
+            'intent' => $customer->createSetupIntent()
+        ]);
     }
 
     /**
@@ -95,6 +145,7 @@ class CustomerController extends Controller
     {
         //
     }
+    
 
     /**
      * Remove the specified resource from storage.

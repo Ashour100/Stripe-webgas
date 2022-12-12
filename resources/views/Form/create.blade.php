@@ -71,7 +71,8 @@
         });
         const cardHolderName = document.getElementById('card-holder-name');
         const cardButton = document.getElementById('card-button');
-        const clientSecret = cardButton.dataset.secret;    cardButton.addEventListener('click', async (e) => {
+        const clientSecret = cardButton.dataset.secret;    
+        cardButton.addEventListener('click', async (e) => {
             console.log("attempting");
             const { setupIntent, error } = await stripe.confirmCardSetup(
             clientSecret, {

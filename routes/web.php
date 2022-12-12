@@ -3,9 +3,10 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\FormController;
+use App\Models\Customer;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
-
+use Laravel\Cashier\Payment;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,6 +26,12 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+
+Route::get('/sepa/create', [CustomerController::class, 'createSepa'])->name('customer.createSepa');
+Route::post('/sepa', [CustomerController::class, 'storeSepa'])->name('storeSepa');
+// Route::post('/pay', [CustomerController::class,'paymentIntent']);
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

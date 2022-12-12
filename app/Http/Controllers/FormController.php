@@ -24,7 +24,7 @@ class FormController extends Controller
      */
     public function create()
     {
-        return view('form.create');
+        // return view('form.create');
     }
 
     /**
