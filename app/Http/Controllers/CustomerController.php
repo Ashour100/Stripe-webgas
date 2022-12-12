@@ -66,9 +66,14 @@ class CustomerController extends Controller
     public function createSepa(customer $customer)
     {
         $payment =$customer->payWith(50*100, ['sepa_debit']);
+        $SetupIntent=Cashier::stripe()->setupIntents->create(['payment_method_types' => ['sepa_debit']]);
+        // $SetupIntent=$customer->createSetupIntent();
+        // $SetupIntent->payment_method_types=['card','sepa_debit'];
+        // dd($SetupIntent);
+        // $SetupIntent->payment_method_options=[];
         return view('Form.createSepa', [
             'user'=>$customer,
-            'SetupIntent' => $customer->createSetupIntent(),
+            'SetupIntent' => $SetupIntent,
             'PaymentIntent'=>$payment->client_secret
         ]);
     }
@@ -94,16 +99,21 @@ class CustomerController extends Controller
         // $stripeCustomer = $customer->createAsStripeCustomer($options);
         $paymentMethod = $data['payment_method'];
         $customer->createOrGetStripeCustomer($options);
+        // dd($data['SetupIntent']);
         $customer->addPaymentMethod($paymentMethod);
+        // dd($customer);
         // $customer->updateDefaultPaymentMethod($paymentMethod);
-        try
-        {
-        $customer->charge(5*100, $paymentMethod);
-        }
-        catch (\Exception $e)
-        {
-        return back()->withErrors(['message' => 'Error creating subscription. ' . $e->getMessage()]);
-        }
+        // $customer->payWith(50*100, ['sepa_debit']);
+        // try
+        // {
+        // $customer->charge(50*100, $paymentMethod);
+        // // $()->payWith(50*100, $paymentMethod);
+        // }
+        // catch (\Exception $e)
+        // {
+        // dd($e->getMessage());
+        // return back()->withErrors(['message' => 'Error creating subscription. ' . $e->getMessage()]);
+        // }
         return redirect('/customer');
     }
     /**

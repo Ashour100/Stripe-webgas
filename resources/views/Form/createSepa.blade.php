@@ -893,7 +893,7 @@
           }
         };
         const cardButton = document.getElementById('confirm-mandate');
-        const clientSecret = cardButton.dataset.secret;  
+        const PayClientSecret = cardButton.dataset.secret;  
         console.log(cardButton.dataset)
           
         
@@ -919,38 +919,39 @@
         document.querySelector("button").disabled = false;
         cardButton.addEventListener('click', async (e) => {
         console.log("attempting");
-        pay(stripe, iban, clientSecret);
+        pay(stripe, iban,PayClientSecret);
       });
         return {
           stripe: stripe,
           iban: iban,
-          clientSecret: clientSecret
+          PayClientSecret: PayClientSecret
         };
       };
 
       setupElements();
       
-      function setupIntent(stripe,PM){
-        const mandate = document.getElementById('mandate-acceptance');
-        const clientSecret = mandate.dataset.secret;
-        console.log(clientSecret)
-        stripe
-          .confirmSepaDebitSetup(clientSecret, {
-            payment_method: PM,
-          })
-          .then(function(result) {
-            if (result.error) {
-              showError(result.error.message);
-              console.log(result.error.message)
-            } else {
-              console.log(result)
-              // console.log(result.paymentIntent.payment_method)
-              // setupIntent(stripe,result.paymentIntent.payment_method);
-              // paymentMethodHandler(result.paymentIntent.client_secret,result.paymentIntent.payment_method);
-              // orderComplete(result.paymentIntent.client_secret);
-            }
-          });
-      };
+      // function setupIntent(stripe,PM){
+      //   const mandate = document.getElementById('mandate-acceptance');
+      //   const SetupClientSecret = mandate.dataset.secret;
+      //   console.log(clientSecret)
+      //   stripe
+      //     .confirmSepaDebitSetup(SetupClientSecret, {
+      //       payment_method: PM,
+      //     })
+      //     .then(function(result) {
+      //       if (result.error) {
+      //         showError(result.error.message);
+      //         console.log(result.error.message)
+      //       } else {
+      //         console.log(result)
+      //         // console.log(result.paymentIntent.payment_method)
+      //         // setupIntent(stripe,result.paymentIntent.payment_method);
+      //         // paymentMethodHandler(result.paymentIntent.client_secret,result.paymentIntent.payment_method);
+      //         // orderComplete(result.paymentIntent.client_secret);
+      //       }
+      //     });
+          
+      //   };
       function paymentMethodHandler(client_secret,payment_method) {
             var form = document.getElementById('payment-form');
             var hiddenInput = document.createElement('input');
@@ -964,12 +965,14 @@
       /*
       * Calls stripe.confirmSepaDebitPayment to generate the mandate and initaite the debit.
       */
-      var pay = function(stripe, iban, clientSecret) {
+      var pay = function(stripe, iban,PayClientSecret) {
         console.log("attempting");
         changeLoadingState(true);
         // Initiate the payment.
+        const mandate = document.getElementById('mandate-acceptance');
+        const SetupClientSecret = mandate.dataset.secret;
         stripe
-          .confirmSepaDebitPayment(clientSecret, 
+          .confirmSepaDebitSetup(SetupClientSecret, 
           {
             payment_method: {
               sepa_debit: iban,
@@ -978,20 +981,42 @@
                 email: document.querySelector('input[name="email"]').value,
               },
             },
-            setup_future_usage: 'off_session',
           })
           .then(function(result) {
             if (result.error) {
               // Show error to your customer
               showError(result.error.message);
+              console.log(result.error.message)
+
             } else {
               console.log(result)
-              // console.log(result.paymentIntent.payment_method)
+              console.log(result.setupIntent.payment_method)
               // setupIntent(stripe,result.paymentIntent.payment_method);
-              paymentMethodHandler(result.paymentIntent.client_secret,result.paymentIntent.payment_method);
               // orderComplete(result.paymentIntent.client_secret);
             }
           });
+          stripe
+            .confirmSepaDebitPayment(PayClientSecret, {
+              payment_method: {
+                sepa_debit: iban,
+                billing_details: {
+                  name: document.querySelector('input[name="name"]').value,
+                  email: document.querySelector('input[name="email"]').value,
+                },
+              },
+            })
+            .then(function(result) {
+              if (result.error) {
+              // Show error to your customer
+              showError(result.error.message);
+              console.log(result.error.message)
+              } 
+              else {
+                console.log(result)
+                console.log(result.paymentIntent.payment_method)
+                paymentMethodHandler(result.paymentIntent.client_secret,result.paymentIntent.payment_method);
+              }
+            });
         
       };
 

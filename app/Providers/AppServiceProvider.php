@@ -25,5 +25,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Cashier::useCustomerModel(Customer::class);
+        // Cashier::useSubscriptionModel(Subscription::class);
+        // Cashier::useSubscriptionItemModel(SubscriptionItem::class);
     }
 }
