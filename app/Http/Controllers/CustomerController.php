@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 use Laravel\Cashier\Cashier;
-use App\Models\customer;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use Laravel\Cashier\Payment;
 
